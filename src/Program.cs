@@ -1,7 +1,8 @@
-﻿using DotNet.Testcontainers.Builders;
-using DotNet.Testcontainers.Configurations;
+﻿using DotNet.Testcontainers.Configurations;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
+using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Containers;
 
 using var loggerFactory =
     LoggerFactory.Create(loggingBuilder => loggingBuilder
@@ -9,20 +10,36 @@ using var loggerFactory =
         {
             c.IncludeScopes = true;
             c.SingleLine = true;
-            c.ColorBehavior = LoggerColorBehavior.Disabled;
-        }));
+            // c.ColorBehavior = LoggerColorBehavior.Disabled;
+        })
+        .SetMinimumLevel(LogLevel.Debug));
 
 var logger = loggerFactory.CreateLogger<Program>();
 TestcontainersSettings.Logger = logger;
 
-logger.LogWarning("Begin Program");
+logger.LogInformation("Begin Test");
 
-var dockerFileDir = Path.GetFullPath(Directory.GetCurrentDirectory())
-    .Split($"{Path.DirectorySeparatorChar}src")
-    .First();
+PostgreSqlTestcontainerConfiguration dbCredentials = new()
+{
+    Username = "postgres",
+    Password = "postgres",
+    Database = "integration_test_db"
+};
+var postgresSql = new TestcontainersBuilder<PostgreSqlTestcontainer>()
+     .WithHostname("db")
+     .WithDatabase(dbCredentials)
+     .Build();
 
-await new ImageFromDockerfileBuilder()
-    .WithDockerfileDirectory(dockerFileDir)
-    .WithDeleteIfExists(true)
-    .WithCleanUp(true)
-    .WithName("test_image_name").Build();
+await postgresSql.StartAsync();
+await Task.Delay(1000);
+// var dockerFileDir = Path.GetFullPath(Directory.GetCurrentDirectory())
+//     .Split($"{Path.DirectorySeparatorChar}src")
+//     .First();
+
+// await new ImageFromDockerfileBuilder()
+//     .WithDockerfileDirectory(dockerFileDir)
+//     .WithDeleteIfExists(true)
+//     .WithCleanUp(true)
+//     .WithName("test_image_name").Build();
+
+logger.LogInformation("End Test");
