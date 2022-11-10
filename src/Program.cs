@@ -12,12 +12,12 @@ using var loggerFactory =
             c.SingleLine = true;
             // c.ColorBehavior = LoggerColorBehavior.Disabled;
         })
-        .SetMinimumLevel(LogLevel.Debug));
+        .SetMinimumLevel(LogLevel.Trace));
 
 var logger = loggerFactory.CreateLogger<Program>();
 TestcontainersSettings.Logger = logger;
 
-logger.LogInformation("Begin Test");
+logger.LogInformation("*********** Begin Test **********");
 
 PostgreSqlTestcontainerConfiguration dbCredentials = new()
 {
@@ -42,4 +42,4 @@ await Task.Delay(1000);
 //     .WithCleanUp(true)
 //     .WithName("test_image_name").Build();
 
-logger.LogInformation("End Test");
+logger.LogInformation("*********** End Test **********");
